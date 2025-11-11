@@ -376,6 +376,13 @@
                     <option value="NO">🇳🇴 Oslo County (1)</option>
                     <option value="AU">🇦🇺 New South Wales (1)</option>
                 </select>
+                <select id="protocolSelect">
+                    <option value="all">Все халявные протоколы</option>
+                    <option value="vless">VLESS (579)</option>
+                    <option value="vmess">VMESS (104)</option>
+                    <option value="trojan">TROJAN (26)</option>
+                    <option value="shadowsocks">SHADOWSOCKS (252)</option>
+                </select>
                 <button class="theme-toggle" id="themeToggle">🌙</button>
             </div>
         </div>
@@ -397,6 +404,7 @@
         const API_BASE = 'https://megav.app/servers-api/configs';
         let currentPage = 1;
         let currentCountry = 'all';
+        let currentProtocol = 'all';
         let totalPages = 1;
         let isLoading = false;
 
@@ -426,6 +434,15 @@
             loadConfigs();
         });
 
+        // Protocol selection
+        const protocolSelect = document.getElementById('protocolSelect');
+        protocolSelect.addEventListener('change', () => {
+            currentProtocol = protocolSelect.value;
+            currentPage = 1;
+            document.getElementById('configsText').textContent = '';
+            loadConfigs();
+        });
+
         // Load configs with CORS proxy fallback
         async function loadConfigs() {
             if (isLoading) return;
@@ -449,6 +466,10 @@
 
                 if (currentCountry !== 'all') {
                     params.append('country', currentCountry);
+                }
+
+                if (currentProtocol !== 'all') {
+                    params.append('protocol', currentProtocol);
                 }
 
                 const url = `${API_BASE}?${params.toString()}`;
@@ -645,6 +666,10 @@
 
                     if (currentCountry !== 'all') {
                         params.append('country', currentCountry);
+                    }
+
+                    if (currentProtocol !== 'all') {
+                        params.append('protocol', currentProtocol);
                     }
 
                     const url = `${API_BASE}?${params.toString()}`;
