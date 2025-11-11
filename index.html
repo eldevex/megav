@@ -657,8 +657,8 @@
                     pages.push(i);
                 }
 
-                // Create all fetch promises
-                const fetchPromises = pages.map(page => {
+                // Helper function to fetch a single page with retry
+                async function fetchPage(page) {
                     const params = new URLSearchParams({
                         page: page,
                         per_page: 20
@@ -674,13 +674,21 @@
 
                     const url = `${API_BASE}?${params.toString()}`;
 
-                    return fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                        },
-                        mode: 'cors'
-                    }).catch(corsError => {
+                    try {
+                        let response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                            },
+                            mode: 'cors'
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
+                        return await response.json();
+                    } catch (corsError) {
                         // Try CORS proxy if direct fetch fails
                         const proxies = [
                             `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -688,48 +696,40 @@
                             `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
                         ];
 
-                        let lastError = corsError;
                         for (const proxyUrl of proxies) {
                             try {
-                                return fetch(proxyUrl, {
+                                const response = await fetch(proxyUrl, {
                                     method: 'GET',
                                     headers: {
                                         'Accept': 'application/json',
                                     }
                                 });
+
+                                if (response.ok) {
+                                    return await response.json();
+                                }
                             } catch (proxyError) {
-                                lastError = proxyError;
                                 continue;
                             }
                         }
-                        throw lastError;
-                    });
-                });
-
-                // Wait for all requests to complete
-                const responses = await Promise.allSettled(fetchPromises);
-
-                // Process all responses and parse JSON
-                const dataPromises = responses.map(async (result, index) => {
-                    if (result.status === 'fulfilled' && result.value.ok) {
-                        try {
-                            const data = await result.value.json();
-                            return { success: true, data, page: startPage + index };
-                        } catch (err) {
-                            return { success: false, page: startPage + index };
-                        }
+                        throw corsError;
                     }
-                    return { success: false, page: startPage + index };
-                });
+                }
 
-                const allData = await Promise.allSettled(dataPromises);
+                // Load pages sequentially with delay
                 const allConfigs = [];
                 let loadedPages = 0;
                 let emptyPages = 0;
+                const delayBetweenRequests = 300; // 300ms delay between requests
 
-                allData.forEach((result) => {
-                    if (result.status === 'fulfilled' && result.value.success) {
-                        const data = result.value.data;
+                for (let i = 0; i < pages.length; i++) {
+                    const page = pages[i];
+                    try {
+                        // Update loading text
+                        loadingEl.textContent = `Загрузка страницы ${page} из ${endPage}...`;
+
+                        const data = await fetchPage(page);
+
                         if (data && data.configs && Array.isArray(data.configs)) {
                             const workingConfigs = data.configs.filter(config => config.v2ray_status === 'working');
                             if (workingConfigs.length > 0) {
@@ -741,10 +741,16 @@
                         } else {
                             emptyPages++;
                         }
-                    } else {
+                    } catch (error) {
+                        console.error(`Error loading page ${page}:`, error);
                         emptyPages++;
                     }
-                });
+
+                    // Add delay before next request (except for the last one)
+                    if (i < pages.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
+                    }
+                }
 
                 // Add all configs to text block
                 const currentText = configsText.textContent;
