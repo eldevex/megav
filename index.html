@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Configs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #404040;
+            --success: #10b981;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0f0f0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #e0e0e0;
+            --success: #10b981;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 1rem;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            min-width: 200px;
+            transition: all 0.2s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .configs-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .configs-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.8;
+        }
+
+        .config-item {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 200px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .load-more {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 2rem auto;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .load-more:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .load-more:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: #ef4444;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .stats {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.25rem;
+            }
+
+            select {
+                min-width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .theme-toggle {
+                width: 100%;
+            }
+
+            .configs-container {
+                padding: 1rem;
+                max-height: 60vh;
+            }
+
+            .configs-text {
+                font-size: 0.85rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .configs-container {
+                padding: 0.75rem;
+                max-height: 50vh;
+            }
+
+            .configs-text {
+                font-size: 0.75rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                min-width: auto;
+                font-size: 0.9rem;
+                padding: 0.65rem 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Proxy Configurations</h1>
+            <div class="controls">
+                <select id="countrySelect">
+                    <option value="all">Все халявные страны</option>
+                    <option value="FR">🇫🇷 Seine-Saint-Denis (196)</option>
+                    <option value="MD">🇲🇩 Chișinău Municipality (138)</option>
+                    <option value="NL">🇳🇱 North Holland (105)</option>
+                    <option value="GB">🇬🇧 Manchester (92)</option>
+                    <option value="US">🇺🇸 Washington (86)</option>
+                    <option value="CY">🇨🇾 Nicosia (85)</option>
+                    <option value="HK">🇭🇰 HK (45)</option>
+                    <option value="DE">🇩🇪 Saxony (30)</option>
+                    <option value="BG">🇧🇬 Sofia-Capital (26)</option>
+                    <option value="CA">🇨🇦 Quebec (9)</option>
+                    <option value="SG">🇸🇬 SG (8)</option>
+                    <option value="TR">🇹🇷 İzmir Province (8)</option>
+                    <option value="LV">🇱🇻 Rīga (8)</option>
+                    <option value="JP">🇯🇵 Tokyo (8)</option>
+                    <option value="IN">🇮🇳 Telangana (6)</option>
+                    <option value="RU">🇷🇺 Moscow (6)</option>
+                    <option value="MY">🇲🇾 Kuala Lumpur (5)</option>
+                    <option value="TW">🇹🇼 Taipei City (5)</option>
+                    <option value="FI">🇫🇮 Uusimaa (5)</option>
+                    <option value="VN">🇻🇳 Hanoi (4)</option>
+                    <option value="BR">🇧🇷 São Paulo (3)</option>
+                    <option value="IT">🇮🇹 Province of Milan (3)</option>
+                    <option value="MA">🇲🇦 Fes (3)</option>
+                    <option value="EC">🇪🇨 Pichincha (3)</option>
+                    <option value="AE">🇦🇪 Umm al Qaywayn (3)</option>
+                    <option value="PL">🇵🇱 Mazovia (3)</option>
+                    <option value="TH">🇹🇭 Bangkok (3)</option>
+                    <option value="PR">🇵🇷 PR (2)</option>
+                    <option value="AR">🇦🇷 Buenos Aires F.D. (2)</option>
+                    <option value="BH">🇧🇭 Manama (2)</option>
+                    <option value="CR">🇨🇷 Provincia de San José (2)</option>
+                    <option value="DK">🇩🇰 Capital Region (2)</option>
+                    <option value="DZ">🇩🇿 Boumerdes (2)</option>
+                    <option value="EG">🇪🇬 Cairo Governorate (2)</option>
+                    <option value="ES">🇪🇸 Madrid (2)</option>
+                    <option value="ID">🇮🇩 Jakarta (2)</option>
+                    <option value="KH">🇰🇭 Phnom Penh (2)</option>
+                    <option value="KR">🇰🇷 Seoul (2)</option>
+                    <option value="KZ">🇰🇿 Almaty (2)</option>
+                    <option value="LT">🇱🇹 Vilnius City Municipality (2)</option>
+                    <option value="MK">🇲🇰 MK (2)</option>
+                    <option value="MT">🇲🇹 Valletta (2)</option>
+                    <option value="MX">🇲🇽 Mexico City (2)</option>
+                    <option value="NG">🇳🇬 Lagos (2)</option>
+                    <option value="PA">🇵🇦 Provincia de Panamá (2)</option>
+                    <option value="PE">🇵🇪 Lima region (2)</option>
+                    <option value="PT">🇵🇹 Lisbon (2)</option>
+                    <option value="SE">🇸🇪 Stockholm County (2)</option>
+                    <option value="SI">🇸🇮 Ljubljana (2)</option>
+                    <option value="ZA">🇿🇦 Gauteng (2)</option>
+                    <option value="UA">🇺🇦 Kyiv City (1)</option>
+                    <option value="GT">🇬🇹 Guatemala (1)</option>
+                    <option value="GR">🇬🇷 Central Macedonia (1)</option>
+                    <option value="AT">🇦🇹 Vienna (1)</option>
+                    <option value="PY">🇵🇾 Asunción (1)</option>
+                    <option value="RO">🇷🇴 București (1)</option>
+                    <option value="EE">🇪🇪 Tallinn (1)</option>
+                    <option value="AM">🇦🇲 AM (1)</option>
+                    <option value="CZ">🇨🇿 Prague (1)</option>
+                    <option value="LU">🇱🇺 Luxembourg (1)</option>
+                    <option value="ME">🇲🇪 ME (1)</option>
+                    <option value="XK">🇽🇰 XK (1)</option>
+                    <option value="SK">🇸🇰 Bratislava Region (1)</option>
+                    <option value="CL">🇨🇱 Santiago Metropolitan (1)</option>
+                    <option value="IL">🇮🇱 Central District (1)</option>
+                    <option value="BO">🇧🇴 La Paz Department (1)</option>
+                    <option value="HU">🇭🇺 Budapest (1)</option>
+                    <option value="NO">🇳🇴 Oslo County (1)</option>
+                    <option value="AU">🇦🇺 New South Wales (1)</option>
+                </select>
+                <button class="theme-toggle" id="themeToggle">🌙</button>
+            </div>
+        </div>
+
+        <div id="errorContainer"></div>
+        <div class="stats" id="stats"></div>
+        <div class="configs-container">
+            <div class="configs-text" id="configsText"></div>
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-secondary" id="copyBtn">Копировать все конфиги</button>
+            <button class="btn btn-primary" id="loadMoreBtn">Загрузить следующую страницу</button>
+            <button class="btn btn-primary" id="loadAllBtn">Загрузить все конфиги сразу</button>
+        </div>
+        <div class="loading" id="loading" style="display: none;">Загрузка...</div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://megav.app/servers-api/configs';
+        let currentPage = 1;
+        let currentCountry = 'all';
+        let totalPages = 1;
+        let isLoading = false;
+
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        // Load theme from localStorage or default to dark
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Country selection
+        const countrySelect = document.getElementById('countrySelect');
+        countrySelect.addEventListener('change', () => {
+            currentCountry = countrySelect.value;
+            currentPage = 1;
+            document.getElementById('configsText').textContent = '';
+            loadConfigs();
+        });
+
+        // Load configs with CORS proxy fallback
+        async function loadConfigs() {
+            if (isLoading) return;
+
+            isLoading = true;
+            const loadingEl = document.getElementById('loading');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const errorContainer = document.getElementById('errorContainer');
+            const configsText = document.getElementById('configsText');
+            const statsEl = document.getElementById('stats');
+
+            errorContainer.innerHTML = '';
+            loadingEl.style.display = 'block';
+            loadMoreBtn.disabled = true;
+
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    per_page: 20
+                });
+
+                if (currentCountry !== 'all') {
+                    params.append('country', currentCountry);
+                }
+
+                const url = `${API_BASE}?${params.toString()}`;
+                let response;
+
+                // Try direct fetch first
+                try {
+                    response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                        mode: 'cors'
+                    });
+                    // Check if response is actually ok (not a CORS error page)
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (corsError) {
+                    // If CORS fails, try with CORS proxy
+                    console.log('Direct fetch failed, trying CORS proxy...');
+                    const proxies = [
+                        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+                    ];
+
+                    let lastError = corsError;
+                    for (const proxyUrl of proxies) {
+                        try {
+                            response = await fetch(proxyUrl, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                }
+                            });
+                            if (response.ok) {
+                                break;
+                            }
+                        } catch (proxyError) {
+                            lastError = proxyError;
+                            continue;
+                        }
+                    }
+
+                    if (!response || !response.ok) {
+                        throw lastError;
+                    }
+                }
+
+                // Final check
+                if (!response || !response.ok) {
+                    throw new Error(`HTTP error! status: ${response?.status || 'unknown'}`);
+                }
+
+                const data = await response.json();
+
+                totalPages = data.total_pages || 1;
+                const configs = data && data.configs && Array.isArray(data.configs) ? data.configs : [];
+                const workingConfigs = configs.filter(config => config.v2ray_status === 'working');
+
+                if (workingConfigs.length === 0 && currentPage === 1) {
+                    configsText.textContent = 'Нет доступных конфигураций со статусом "working"';
+                } else if (workingConfigs.length === 0 && currentPage > 1) {
+                    // Если на следующей странице нет конфигов
+                    const currentText = configsText.textContent;
+                    configsText.textContent = currentText + '\n\n--- Страница ' + currentPage + ' пуста ---';
+                } else {
+                    // Add configs to text block, one per line
+                    const configUrls = workingConfigs.map(config => config.config_url);
+                    const currentText = configsText.textContent;
+                    const newText = configUrls.join('\n\n');
+
+                    if (currentPage === 1) {
+                        configsText.textContent = newText;
+                    } else {
+                        // Убираем сообщение о пустой странице, если оно было
+                        const cleanedText = currentText.replace(/\n\n--- Страница \d+ пуста ---$/, '');
+                        configsText.textContent = cleanedText + '\n\n' + newText;
+                    }
+                }
+
+                // Update stats
+                const totalConfigs = configsText.textContent.split('\n\n').filter(line => line.trim().length > 0 && !line.includes('--- Страница')).length;
+                statsEl.textContent = `Показано конфигураций: ${totalConfigs}`;
+
+                // Always show and enable load more button
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = 'Загрузить следующую страницу';
+
+            } catch (error) {
+                let errorMessage = error.message;
+                if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                    errorMessage = 'Ошибка CORS. Попробуйте открыть файл через локальный сервер (например, через Live Server в VS Code) или проверьте подключение к интернету.';
+                }
+                errorContainer.innerHTML = `<div class="error">Ошибка загрузки: ${errorMessage}<br><small>Попробуйте обновить страницу или использовать локальный сервер для запуска.</small></div>`;
+                console.error('Error loading configs:', error);
+            } finally {
+                isLoading = false;
+                loadingEl.style.display = 'none';
+                // Always re-enable button after loading
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.textContent = 'Загрузить следующую страницу';
+            }
+        }
+
+
+        // Copy button
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const configsText = document.getElementById('configsText');
+            const textToCopy = configsText.textContent.trim();
+
+            if (!textToCopy || textToCopy === 'Нет доступных конфигураций со статусом "working"') {
+                alert('Нет конфигов для копирования');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                const copyBtn = document.getElementById('copyBtn');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Скопировано!';
+                copyBtn.style.background = 'var(--success)';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.background = '';
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const copyBtn = document.getElementById('copyBtn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Скопировано!';
+                    copyBtn.style.background = 'var(--success)';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.background = '';
+                    }, 2000);
+                } catch (fallbackErr) {
+                    alert('Не удалось скопировать. Попробуйте выделить текст вручную.');
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+
+        // Load more button
+        document.getElementById('loadMoreBtn').addEventListener('click', () => {
+            if (!isLoading) {
+                currentPage++;
+                loadConfigs();
+            }
+        });
+
+        // Load all configs (20 pages ahead)
+        async function loadAllConfigs() {
+            if (isLoading) return;
+
+            isLoading = true;
+            const loadingEl = document.getElementById('loading');
+            const loadAllBtn = document.getElementById('loadAllBtn');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const errorContainer = document.getElementById('errorContainer');
+            const configsText = document.getElementById('configsText');
+            const statsEl = document.getElementById('stats');
+
+            errorContainer.innerHTML = '';
+            loadingEl.style.display = 'block';
+            loadingEl.textContent = 'Загрузка 20 страниц...';
+            loadAllBtn.disabled = true;
+            loadMoreBtn.disabled = true;
+
+            try {
+                const startPage = currentPage + 1;
+                const endPage = currentPage + 20;
+                const pages = [];
+                for (let i = startPage; i <= endPage; i++) {
+                    pages.push(i);
+                }
+
+                // Create all fetch promises
+                const fetchPromises = pages.map(page => {
+                    const params = new URLSearchParams({
+                        page: page,
+                        per_page: 20
+                    });
+
+                    if (currentCountry !== 'all') {
+                        params.append('country', currentCountry);
+                    }
+
+                    const url = `${API_BASE}?${params.toString()}`;
+
+                    return fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                        mode: 'cors'
+                    }).catch(corsError => {
+                        // Try CORS proxy if direct fetch fails
+                        const proxies = [
+                            `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                            `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+                        ];
+
+                        let lastError = corsError;
+                        for (const proxyUrl of proxies) {
+                            try {
+                                return fetch(proxyUrl, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Accept': 'application/json',
+                                    }
+                                });
+                            } catch (proxyError) {
+                                lastError = proxyError;
+                                continue;
+                            }
+                        }
+                        throw lastError;
+                    });
+                });
+
+                // Wait for all requests to complete
+                const responses = await Promise.allSettled(fetchPromises);
+
+                // Process all responses and parse JSON
+                const dataPromises = responses.map(async (result, index) => {
+                    if (result.status === 'fulfilled' && result.value.ok) {
+                        try {
+                            const data = await result.value.json();
+                            return { success: true, data, page: startPage + index };
+                        } catch (err) {
+                            return { success: false, page: startPage + index };
+                        }
+                    }
+                    return { success: false, page: startPage + index };
+                });
+
+                const allData = await Promise.allSettled(dataPromises);
+                const allConfigs = [];
+                let loadedPages = 0;
+                let emptyPages = 0;
+
+                allData.forEach((result) => {
+                    if (result.status === 'fulfilled' && result.value.success) {
+                        const data = result.value.data;
+                        if (data && data.configs && Array.isArray(data.configs)) {
+                            const workingConfigs = data.configs.filter(config => config.v2ray_status === 'working');
+                            if (workingConfigs.length > 0) {
+                                allConfigs.push(...workingConfigs.map(config => config.config_url));
+                                loadedPages++;
+                            } else {
+                                emptyPages++;
+                            }
+                        } else {
+                            emptyPages++;
+                        }
+                    } else {
+                        emptyPages++;
+                    }
+                });
+
+                // Add all configs to text block
+                const currentText = configsText.textContent;
+                const cleanedText = currentText.replace(/\n\n--- Страница \d+ пуста ---$/, '');
+                const newText = allConfigs.join('\n\n');
+
+                if (currentText && currentText.trim() !== 'Нет доступных конфигураций со статусом "working"') {
+                    configsText.textContent = cleanedText + '\n\n' + newText;
+                } else {
+                    configsText.textContent = newText;
+                }
+
+                // Update current page
+                currentPage = endPage;
+
+                // Update stats
+                const totalConfigs = configsText.textContent.split('\n\n').filter(line => line.trim().length > 0 && !line.includes('--- Страница')).length;
+                statsEl.textContent = `Показано конфигураций: ${totalConfigs} (загружено ${loadedPages} страниц, пустых: ${emptyPages})`;
+
+            } catch (error) {
+                let errorMessage = error.message;
+                if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                    errorMessage = 'Ошибка CORS. Попробуйте открыть файл через локальный сервер или проверьте подключение к интернету.';
+                }
+                errorContainer.innerHTML = `<div class="error">Ошибка загрузки: ${errorMessage}</div>`;
+                console.error('Error loading all configs:', error);
+            } finally {
+                isLoading = false;
+                loadingEl.style.display = 'none';
+                loadingEl.textContent = 'Загрузка...';
+                loadAllBtn.disabled = false;
+                loadMoreBtn.disabled = false;
+            }
+        }
+
+        // Load all button
+        document.getElementById('loadAllBtn').addEventListener('click', () => {
+            if (!isLoading) {
+                loadAllConfigs();
+            }
+        });
+
+        // Initial load
+        loadConfigs();
+    </script>
+</body>
+
+</html>
