@@ -306,75 +306,6 @@
             <div class="controls">
                 <select id="countrySelect">
                     <option value="all">Все халявные страны</option>
-                    <option value="FR">🇫🇷 Seine-Saint-Denis (196)</option>
-                    <option value="MD">🇲🇩 Chișinău Municipality (138)</option>
-                    <option value="NL">🇳🇱 North Holland (105)</option>
-                    <option value="GB">🇬🇧 Manchester (92)</option>
-                    <option value="US">🇺🇸 Washington (86)</option>
-                    <option value="CY">🇨🇾 Nicosia (85)</option>
-                    <option value="HK">🇭🇰 HK (45)</option>
-                    <option value="DE">🇩🇪 Saxony (30)</option>
-                    <option value="BG">🇧🇬 Sofia-Capital (26)</option>
-                    <option value="CA">🇨🇦 Quebec (9)</option>
-                    <option value="SG">🇸🇬 SG (8)</option>
-                    <option value="TR">🇹🇷 İzmir Province (8)</option>
-                    <option value="LV">🇱🇻 Rīga (8)</option>
-                    <option value="JP">🇯🇵 Tokyo (8)</option>
-                    <option value="IN">🇮🇳 Telangana (6)</option>
-                    <option value="RU">🇷🇺 Moscow (6)</option>
-                    <option value="MY">🇲🇾 Kuala Lumpur (5)</option>
-                    <option value="TW">🇹🇼 Taipei City (5)</option>
-                    <option value="FI">🇫🇮 Uusimaa (5)</option>
-                    <option value="VN">🇻🇳 Hanoi (4)</option>
-                    <option value="BR">🇧🇷 São Paulo (3)</option>
-                    <option value="IT">🇮🇹 Province of Milan (3)</option>
-                    <option value="MA">🇲🇦 Fes (3)</option>
-                    <option value="EC">🇪🇨 Pichincha (3)</option>
-                    <option value="AE">🇦🇪 Umm al Qaywayn (3)</option>
-                    <option value="PL">🇵🇱 Mazovia (3)</option>
-                    <option value="TH">🇹🇭 Bangkok (3)</option>
-                    <option value="PR">🇵🇷 PR (2)</option>
-                    <option value="AR">🇦🇷 Buenos Aires F.D. (2)</option>
-                    <option value="BH">🇧🇭 Manama (2)</option>
-                    <option value="CR">🇨🇷 Provincia de San José (2)</option>
-                    <option value="DK">🇩🇰 Capital Region (2)</option>
-                    <option value="DZ">🇩🇿 Boumerdes (2)</option>
-                    <option value="EG">🇪🇬 Cairo Governorate (2)</option>
-                    <option value="ES">🇪🇸 Madrid (2)</option>
-                    <option value="ID">🇮🇩 Jakarta (2)</option>
-                    <option value="KH">🇰🇭 Phnom Penh (2)</option>
-                    <option value="KR">🇰🇷 Seoul (2)</option>
-                    <option value="KZ">🇰🇿 Almaty (2)</option>
-                    <option value="LT">🇱🇹 Vilnius City Municipality (2)</option>
-                    <option value="MK">🇲🇰 MK (2)</option>
-                    <option value="MT">🇲🇹 Valletta (2)</option>
-                    <option value="MX">🇲🇽 Mexico City (2)</option>
-                    <option value="NG">🇳🇬 Lagos (2)</option>
-                    <option value="PA">🇵🇦 Provincia de Panamá (2)</option>
-                    <option value="PE">🇵🇪 Lima region (2)</option>
-                    <option value="PT">🇵🇹 Lisbon (2)</option>
-                    <option value="SE">🇸🇪 Stockholm County (2)</option>
-                    <option value="SI">🇸🇮 Ljubljana (2)</option>
-                    <option value="ZA">🇿🇦 Gauteng (2)</option>
-                    <option value="UA">🇺🇦 Kyiv City (1)</option>
-                    <option value="GT">🇬🇹 Guatemala (1)</option>
-                    <option value="GR">🇬🇷 Central Macedonia (1)</option>
-                    <option value="AT">🇦🇹 Vienna (1)</option>
-                    <option value="PY">🇵🇾 Asunción (1)</option>
-                    <option value="RO">🇷🇴 București (1)</option>
-                    <option value="EE">🇪🇪 Tallinn (1)</option>
-                    <option value="AM">🇦🇲 AM (1)</option>
-                    <option value="CZ">🇨🇿 Prague (1)</option>
-                    <option value="LU">🇱🇺 Luxembourg (1)</option>
-                    <option value="ME">🇲🇪 ME (1)</option>
-                    <option value="XK">🇽🇰 XK (1)</option>
-                    <option value="SK">🇸🇰 Bratislava Region (1)</option>
-                    <option value="CL">🇨🇱 Santiago Metropolitan (1)</option>
-                    <option value="IL">🇮🇱 Central District (1)</option>
-                    <option value="BO">🇧🇴 La Paz Department (1)</option>
-                    <option value="HU">🇭🇺 Budapest (1)</option>
-                    <option value="NO">🇳🇴 Oslo County (1)</option>
-                    <option value="AU">🇦🇺 New South Wales (1)</option>
                 </select>
                 <select id="protocolSelect">
                     <option value="all">Все халявные протоколы</option>
@@ -399,20 +330,19 @@
         </div>
         <div class="loading" id="loading" style="display: none;">Загрузка...</div>
     </div>
-
-    <script>
-        const API_BASE = 'https://megav.app/servers-api/configs';
-        let currentPage = 1;
-        let currentCountry = 'all';
-        let currentProtocol = 'all';
-        let totalPages = 1;
-        let isLoading = false;
+ <script>
+    const API_BASE = 'https://megav.app/servers-api/configs';
+    const COUNTRIES_API = 'https://megav.app/servers-api/countries';
+    let currentPage = 1;
+    let currentCountry = 'all';
+    let currentProtocol = 'all';
+    let totalPages = 1;
+    let isLoading = false;
 
         // Theme management
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
 
-        // Load theme from localStorage or default to dark
         const savedTheme = localStorage.getItem('theme') || 'dark';
         html.setAttribute('data-theme', savedTheme);
         themeToggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
@@ -425,171 +355,232 @@
             localStorage.setItem('theme', newTheme);
         });
 
-        // Country selection
-        const countrySelect = document.getElementById('countrySelect');
-        countrySelect.addEventListener('change', () => {
-            currentCountry = countrySelect.value;
-            currentPage = 1;
-            document.getElementById('configsText').textContent = '';
-            loadConfigs();
-        });
+    // Country select
+    const countrySelect = document.getElementById('countrySelect');
 
-        // Protocol selection
-        const protocolSelect = document.getElementById('protocolSelect');
-        protocolSelect.addEventListener('change', () => {
-            currentProtocol = protocolSelect.value;
-            currentPage = 1;
-            document.getElementById('configsText').textContent = '';
-            loadConfigs();
-        });
+    // Flag emoji from country code
+    function getFlagEmoji(code) {
+        if (!code || code.length !== 2) return '';
+        return code.toUpperCase().replace(/./g, char =>
+            String.fromCodePoint(0x1F1E6 + char.charCodeAt(0) - 0x41)
+        );
+    }
 
-        // Load configs with CORS proxy fallback
-        async function loadConfigs() {
-            if (isLoading) return;
+    // Load countries from API
+    async function loadCountries() {
+        const defaultOption = countrySelect.querySelector('option[value="all"]');
+        countrySelect.innerHTML = '';
+        countrySelect.appendChild(defaultOption);
 
-            isLoading = true;
-            const loadingEl = document.getElementById('loading');
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            const errorContainer = document.getElementById('errorContainer');
-            const configsText = document.getElementById('configsText');
-            const statsEl = document.getElementById('stats');
-
-            errorContainer.innerHTML = '';
-            loadingEl.style.display = 'block';
-            loadMoreBtn.disabled = true;
+        try {
+            let response;
+            const url = COUNTRIES_API;
 
             try {
-                const params = new URLSearchParams({
-                    page: currentPage,
-                    per_page: 20
-                });
+                response = await fetch(url, { mode: 'cors' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            } catch (corsError) {
+                console.log('Direct fetch failed for countries, trying CORS proxy...');
+                const proxies = [
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+                ];
 
-                if (currentCountry !== 'all') {
-                    params.append('country', currentCountry);
-                }
-
-                if (currentProtocol !== 'all') {
-                    params.append('protocol', currentProtocol);
-                }
-
-                const url = `${API_BASE}?${params.toString()}`;
-                let response;
-
-                // Try direct fetch first
-                try {
-                    response = await fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                        },
-                        mode: 'cors'
-                    });
-                    // Check if response is actually ok (not a CORS error page)
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                } catch (corsError) {
-                    // If CORS fails, try with CORS proxy
-                    console.log('Direct fetch failed, trying CORS proxy...');
-                    const proxies = [
-                        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-                    ];
-
-                    let lastError = corsError;
-                    for (const proxyUrl of proxies) {
-                        try {
-                            response = await fetch(proxyUrl, {
-                                method: 'GET',
-                                headers: {
-                                    'Accept': 'application/json',
-                                }
-                            });
-                            if (response.ok) {
-                                break;
-                            }
-                        } catch (proxyError) {
-                            lastError = proxyError;
-                            continue;
-                        }
-                    }
-
-                    if (!response || !response.ok) {
-                        throw lastError;
+                let lastError = corsError;
+                for (const proxyUrl of proxies) {
+                    try {
+                        response = await fetch(proxyUrl);
+                        if (response.ok) break;
+                    } catch (proxyError) {
+                        lastError = proxyError;
                     }
                 }
-
-                // Final check
-                if (!response || !response.ok) {
-                    throw new Error(`HTTP error! status: ${response?.status || 'unknown'}`);
-                }
-
-                const data = await response.json();
-
-                totalPages = data.total_pages || 1;
-                const configs = data && data.configs && Array.isArray(data.configs) ? data.configs : [];
-                const workingConfigs = configs.filter(config => config.v2ray_status === 'working');
-
-                if (workingConfigs.length === 0 && currentPage === 1) {
-                    configsText.textContent = 'Нет доступных конфигураций со статусом "working"';
-                } else if (workingConfigs.length === 0 && currentPage > 1) {
-                    // Если на следующей странице нет конфигов
-                    const currentText = configsText.textContent;
-                    configsText.textContent = currentText + '\n\n--- Страница ' + currentPage + ' пуста ---';
-                } else {
-                    // Add configs to text block, one per line
-                    const configUrls = workingConfigs.map(config => config.config_url);
-                    const currentText = configsText.textContent;
-                    const newText = configUrls.join('\n\n');
-
-                    if (currentPage === 1) {
-                        configsText.textContent = newText;
-                    } else {
-                        // Убираем сообщение о пустой странице, если оно было
-                        const cleanedText = currentText.replace(/\n\n--- Страница \d+ пуста ---$/, '');
-                        configsText.textContent = cleanedText + '\n\n' + newText;
-                    }
-                }
-
-                // Update stats
-                const totalConfigs = configsText.textContent.split('\n\n').filter(line => line.trim().length > 0 && !line.includes('--- Страница')).length;
-                statsEl.textContent = `Показано конфигураций: ${totalConfigs}`;
-
-                // Always show and enable load more button
-                loadMoreBtn.style.display = 'block';
-                loadMoreBtn.disabled = false;
-                loadMoreBtn.textContent = 'Загрузить следующую страницу';
-
-            } catch (error) {
-                let errorMessage = error.message;
-                if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-                    errorMessage = 'Ошибка CORS. Попробуйте открыть файл через локальный сервер (например, через Live Server в VS Code) или проверьте подключение к интернету.';
-                }
-                errorContainer.innerHTML = `<div class="error">Ошибка загрузки: ${errorMessage}<br><small>Попробуйте обновить страницу или использовать локальный сервер для запуска.</small></div>`;
-                console.error('Error loading configs:', error);
-            } finally {
-                isLoading = false;
-                loadingEl.style.display = 'none';
-                // Always re-enable button after loading
-                loadMoreBtn.disabled = false;
-                loadMoreBtn.textContent = 'Загрузить следующую страницу';
+                if (!response || !response.ok) throw lastError;
             }
+
+            const countries = await response.json();
+
+            if (!Array.isArray(countries)) {
+                throw new Error('Invalid countries data');
+            }
+
+            countries.sort((a, b) => (b.server_count || 0) - (a.server_count || 0));
+
+            countries.forEach(country => {
+                if (!country.code || !country.name || country.server_count === undefined) return;
+
+                const flag = getFlagEmoji(country.flag || country.code);
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = `${flag} ${country.name} (${country.server_count})`;
+                countrySelect.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error('Failed to load countries:', error);
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'error';
+            errorMsg.innerHTML = 'Не удалось загрузить список стран. Попробуйте позже.';
+            document.getElementById('errorContainer').appendChild(errorMsg);
+        }
+    }
+
+    // Protocol selection
+    const protocolSelect = document.getElementById('protocolSelect');
+    protocolSelect.addEventListener('change', () => {
+        currentProtocol = protocolSelect.value;
+        currentPage = 1;
+        document.getElementById('configsText').textContent = '';
+        loadConfigs();
+    });
+
+    // Country selection
+    countrySelect.addEventListener('change', () => {
+        currentCountry = countrySelect.value;
+        currentPage = 1;
+        document.getElementById('configsText').textContent = '';
+        loadConfigs();
+    });
+
+    // Load configs with CORS proxy fallback
+    async function loadConfigs() {
+        if (isLoading) return;
+
+        isLoading = true;
+        const loadingEl = document.getElementById('loading');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const errorContainer = document.getElementById('errorContainer');
+        const configsText = document.getElementById('configsText');
+        const statsEl = document.getElementById('stats');
+
+        errorContainer.innerHTML = '';
+        loadingEl.style.display = 'block';
+        loadMoreBtn.disabled = true;
+
+        try {
+            const params = new URLSearchParams({
+                page: currentPage,
+                per_page: 20
+            });
+
+            if (currentCountry !== 'all') {
+                params.append('country', currentCountry);
+            }
+
+            if (currentProtocol !== 'all') {
+                params.append('protocol', currentProtocol);
+            }
+
+            const url = `${API_BASE}?${params.toString()}`;
+            let response;
+
+            try {
+                response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    mode: 'cors'
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            } catch (corsError) {
+                console.log('Direct fetch failed, trying CORS proxy...');
+                const proxies = [
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+                ];
+
+                let lastError = corsError;
+                for (const proxyUrl of proxies) {
+                    try {
+                        response = await fetch(proxyUrl, { headers: { 'Accept': 'application/json' } });
+                        if (response.ok) break;
+                    } catch (proxyError) {
+                        lastError = proxyError;
+                    }
+                }
+                if (!response || !response.ok) throw lastError;
+            }
+
+            if (!response || !response.ok) {
+                throw new Error(`HTTP error! status: ${response?.status || 'unknown'}`);
+            }
+
+            const data = await response.json();
+            totalPages = data.total_pages || 1;
+            const configs = data && data.configs && Array.isArray(data.configs) ? data.configs : [];
+            const workingConfigs = configs.filter(config => config.v2ray_status === 'working');
+
+            if (workingConfigs.length === 0 && currentPage === 1) {
+                configsText.textContent = 'Нет доступных конфигураций со статусом "working"';
+            } else if (workingConfigs.length === 0 && currentPage > 1) {
+                const currentText = configsText.textContent;
+                configsText.textContent = currentText + '\n\n--- Страница ' + currentPage + ' пуста ---';
+            } else {
+                const configUrls = workingConfigs.map(config => config.config_url);
+                const currentText = configsText.textContent;
+                const newText = configUrls.join('\n\n');
+
+                if (currentPage === 1) {
+                    configsText.textContent = newText;
+                } else {
+                    const cleanedText = currentText.replace(/\n\n--- Страница \d+ пуста ---$/, '');
+                    configsText.textContent = cleanedText + '\n\n' + newText;
+                }
+            }
+
+            const totalConfigs = configsText.textContent.split('\n\n')
+                .filter(line => line.trim().length > 0 && !line.includes('--- Страница')).length;
+            statsEl.textContent = `Показано конфигураций: ${totalConfigs}`;
+
+            loadMoreBtn.style.display = 'block';
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.textContent = 'Загрузить следующую страницу';
+
+        } catch (error) {
+            let errorMessage = error.message;
+            if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                errorMessage = 'Ошибка CORS. Попробуйте открыть файл через локальный сервер (например, Live Server в VS Code).';
+            }
+            errorContainer.innerHTML = `<div class="error">Ошибка загрузки: ${errorMessage}<br><small>Попробуйте обновить страницу.</small></div>`;
+            console.error('Error loading configs:', error);
+        } finally {
+            isLoading = false;
+            loadingEl.style.display = 'none';
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.textContent = 'Загрузить следующую страницу';
+        }
+    }
+
+    // Copy button
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+        const configsText = document.getElementById('configsText');
+        const textToCopy = configsText.textContent.trim();
+
+        if (!textToCopy || textToCopy === 'Нет доступных конфигураций со статусом "working"') {
+            alert('Нет конфигов для копирования');
+            return;
         }
 
-
-        // Copy button
-        document.getElementById('copyBtn').addEventListener('click', async () => {
-            const configsText = document.getElementById('configsText');
-            const textToCopy = configsText.textContent.trim();
-
-            if (!textToCopy || textToCopy === 'Нет доступных конфигураций со статусом "working"') {
-                alert('Нет конфигов для копирования');
-                return;
-            }
-
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            const copyBtn = document.getElementById('copyBtn');
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Скопировано!';
+            copyBtn.style.background = 'var(--success)';
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.background = '';
+            }, 2000);
+        } catch (err) {
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
             try {
-                await navigator.clipboard.writeText(textToCopy);
+                document.execCommand('copy');
                 const copyBtn = document.getElementById('copyBtn');
                 const originalText = copyBtn.textContent;
                 copyBtn.textContent = 'Скопировано!';
@@ -598,204 +589,152 @@
                     copyBtn.textContent = originalText;
                     copyBtn.style.background = '';
                 }, 2000);
-            } catch (err) {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = textToCopy;
-                textArea.style.position = 'fixed';
-                textArea.style.opacity = '0';
-                document.body.appendChild(textArea);
-                textArea.select();
+            } catch (fallbackErr) {
+                alert('Не удалось скопировать. Выделите текст вручную.');
+            }
+            document.body.removeChild(textArea);
+        }
+    });
+
+    // Load more button
+    document.getElementById('loadMoreBtn').addEventListener('click', () => {
+        if (!isLoading) {
+            currentPage++;
+            loadConfigs();
+        }
+    });
+
+    // Load all configs (20 pages ahead)
+    async function loadAllConfigs() {
+        if (isLoading) return;
+
+        isLoading = true;
+        const loadingEl = document.getElementById('loading');
+        const loadAllBtn = document.getElementById('loadAllBtn');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const errorContainer = document.getElementById('errorContainer');
+        const configsText = document.getElementById('configsText');
+        const statsEl = document.getElementById('stats');
+
+        errorContainer.innerHTML = '';
+        loadingEl.style.display = 'block';
+        loadingEl.textContent = 'Загрузка 20 страниц...';
+        loadAllBtn.disabled = true;
+        loadMoreBtn.disabled = true;
+
+        try {
+            const startPage = currentPage + 1;
+            const endPage = currentPage + 20;
+            const pages = [];
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+
+            async function fetchPage(page) {
+                const params = new URLSearchParams({
+                    page: page,
+                    per_page: 20
+                });
+
+                if (currentCountry !== 'all') params.append('country', currentCountry);
+                if (currentProtocol !== 'all') params.append('protocol', currentProtocol);
+
+                const url = `${API_BASE}?${params.toString()}`;
+
                 try {
-                    document.execCommand('copy');
-                    const copyBtn = document.getElementById('copyBtn');
-                    const originalText = copyBtn.textContent;
-                    copyBtn.textContent = 'Скопировано!';
-                    copyBtn.style.background = 'var(--success)';
-                    setTimeout(() => {
-                        copyBtn.textContent = originalText;
-                        copyBtn.style.background = '';
-                    }, 2000);
-                } catch (fallbackErr) {
-                    alert('Не удалось скопировать. Попробуйте выделить текст вручную.');
+                    let response = await fetch(url, { mode: 'cors', headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (corsError) {
+                    const proxies = [
+                        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+                    ];
+
+                    for (const proxyUrl of proxies) {
+                        try {
+                            const response = await fetch(proxyUrl, { headers: { 'Accept': 'application/json' } });
+                            if (response.ok) return await response.json();
+                        } catch (proxyError) { continue; }
+                    }
+                    throw corsError;
                 }
-                document.body.removeChild(textArea);
             }
-        });
 
-        // Load more button
-        document.getElementById('loadMoreBtn').addEventListener('click', () => {
-            if (!isLoading) {
-                currentPage++;
-                loadConfigs();
-            }
-        });
+            const allConfigs = [];
+            let loadedPages = 0;
+            let emptyPages = 0;
+            const delayBetweenRequests = 300;
 
-        // Load all configs (20 pages ahead)
-        async function loadAllConfigs() {
-            if (isLoading) return;
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+                try {
+                    loadingEl.textContent = `Загрузка страницы ${page} из ${endPage}...`;
+                    const data = await fetchPage(page);
 
-            isLoading = true;
-            const loadingEl = document.getElementById('loading');
-            const loadAllBtn = document.getElementById('loadAllBtn');
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            const errorContainer = document.getElementById('errorContainer');
-            const configsText = document.getElementById('configsText');
-            const statsEl = document.getElementById('stats');
-
-            errorContainer.innerHTML = '';
-            loadingEl.style.display = 'block';
-            loadingEl.textContent = 'Загрузка 20 страниц...';
-            loadAllBtn.disabled = true;
-            loadMoreBtn.disabled = true;
-
-            try {
-                const startPage = currentPage + 1;
-                const endPage = currentPage + 20;
-                const pages = [];
-                for (let i = startPage; i <= endPage; i++) {
-                    pages.push(i);
-                }
-
-                // Helper function to fetch a single page with retry
-                async function fetchPage(page) {
-                    const params = new URLSearchParams({
-                        page: page,
-                        per_page: 20
-                    });
-
-                    if (currentCountry !== 'all') {
-                        params.append('country', currentCountry);
-                    }
-
-                    if (currentProtocol !== 'all') {
-                        params.append('protocol', currentProtocol);
-                    }
-
-                    const url = `${API_BASE}?${params.toString()}`;
-
-                    try {
-                        let response = await fetch(url, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                            },
-                            mode: 'cors'
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
-                        }
-
-                        return await response.json();
-                    } catch (corsError) {
-                        // Try CORS proxy if direct fetch fails
-                        const proxies = [
-                            `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                            `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-                        ];
-
-                        for (const proxyUrl of proxies) {
-                            try {
-                                const response = await fetch(proxyUrl, {
-                                    method: 'GET',
-                                    headers: {
-                                        'Accept': 'application/json',
-                                    }
-                                });
-
-                                if (response.ok) {
-                                    return await response.json();
-                                }
-                            } catch (proxyError) {
-                                continue;
-                            }
-                        }
-                        throw corsError;
-                    }
-                }
-
-                // Load pages sequentially with delay
-                const allConfigs = [];
-                let loadedPages = 0;
-                let emptyPages = 0;
-                const delayBetweenRequests = 300; // 300ms delay between requests
-
-                for (let i = 0; i < pages.length; i++) {
-                    const page = pages[i];
-                    try {
-                        // Update loading text
-                        loadingEl.textContent = `Загрузка страницы ${page} из ${endPage}...`;
-
-                        const data = await fetchPage(page);
-
-                        if (data && data.configs && Array.isArray(data.configs)) {
-                            const workingConfigs = data.configs.filter(config => config.v2ray_status === 'working');
-                            if (workingConfigs.length > 0) {
-                                allConfigs.push(...workingConfigs.map(config => config.config_url));
-                                loadedPages++;
-                            } else {
-                                emptyPages++;
-                            }
+                    if (data && data.configs && Array.isArray(data.configs)) {
+                        const workingConfigs = data.configs.filter(config => config.v2ray_status === 'working');
+                        if (workingConfigs.length > 0) {
+                            allConfigs.push(...workingConfigs.map(config => config.config_url));
+                            loadedPages++;
                         } else {
                             emptyPages++;
                         }
-                    } catch (error) {
-                        console.error(`Error loading page ${page}:`, error);
+                    } else {
                         emptyPages++;
                     }
-
-                    // Add delay before next request (except for the last one)
-                    if (i < pages.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
-                    }
+                } catch (error) {
+                    console.error(`Error loading page ${page}:`, error);
+                    emptyPages++;
                 }
 
-                // Add all configs to text block
-                const currentText = configsText.textContent;
-                const cleanedText = currentText.replace(/\n\n--- Страница \d+ пуста ---$/, '');
-                const newText = allConfigs.join('\n\n');
-
-                if (currentText && currentText.trim() !== 'Нет доступных конфигураций со статусом "working"') {
-                    configsText.textContent = cleanedText + '\n\n' + newText;
-                } else {
-                    configsText.textContent = newText;
+                if (i < pages.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
                 }
-
-                // Update current page
-                currentPage = endPage;
-
-                // Update stats
-                const totalConfigs = configsText.textContent.split('\n\n').filter(line => line.trim().length > 0 && !line.includes('--- Страница')).length;
-                statsEl.textContent = `Показано конфигураций: ${totalConfigs} (загружено ${loadedPages} страниц, пустых: ${emptyPages})`;
-
-            } catch (error) {
-                let errorMessage = error.message;
-                if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-                    errorMessage = 'Ошибка CORS. Попробуйте открыть файл через локальный сервер или проверьте подключение к интернету.';
-                }
-                errorContainer.innerHTML = `<div class="error">Ошибка загрузки: ${errorMessage}</div>`;
-                console.error('Error loading all configs:', error);
-            } finally {
-                isLoading = false;
-                loadingEl.style.display = 'none';
-                loadingEl.textContent = 'Загрузка...';
-                loadAllBtn.disabled = false;
-                loadMoreBtn.disabled = false;
             }
+
+            const currentText = configsText.textContent;
+            const cleanedText = currentText.replace(/\n\n--- Страница \d+ пуста ---$/, '');
+            const newText = allConfigs.join('\n\n');
+
+            if (currentText && currentText.trim() !== 'Нет доступных конфигураций со статусом "working"') {
+                configsText.textContent = cleanedText + '\n\n' + newText;
+            } else {
+                configsText.textContent = newText;
+            }
+
+            currentPage = endPage;
+
+            const totalConfigs = configsText.textContent.split('\n\n')
+                .filter(line => line.trim().length > 0 && !line.includes('--- Страница')).length;
+            statsEl.textContent = `Показано конфигураций: ${totalConfigs} (загружено ${loadedPages} страниц, пустых: ${emptyPages})`;
+
+        } catch (error) {
+            let errorMessage = error.message;
+            if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                errorMessage = 'Ошибка CORS. Используйте локальный сервер.';
+            }
+            errorContainer.innerHTML = `<div class="error">Ошибка: ${errorMessage}</div>`;
+            console.error('Error loading all configs:', error);
+        } finally {
+            isLoading = false;
+            loadingEl.style.display = 'none';
+            loadingEl.textContent = 'Загрузка...';
+            loadAllBtn.disabled = false;
+            loadMoreBtn.disabled = false;
         }
+    }
 
-        // Load all button
-        document.getElementById('loadAllBtn').addEventListener('click', () => {
-            if (!isLoading) {
-                loadAllConfigs();
-            }
-        });
+    document.getElementById('loadAllBtn').addEventListener('click', () => {
+        if (!isLoading) loadAllConfigs();
+    });
 
-        // Initial load
+    // Initial load: countries → configs
+    loadCountries().then(() => {
         loadConfigs();
-    </script>
+    });
+</script>
 </body>
 
 </html>
