@@ -4,6 +4,7 @@ header('Content-Type: text/html; charset=utf-8');
 // === НАСТРОЙКИ ===
 $API_BASE = 'https://megav.app/servers-api/configs';
 $COUNTRIES_API = 'https://megav.app/servers-api/countries';
+$STATS_API = 'https://megav.app/servers-api/stats';
 $PER_PAGE = 20;
 $MAX_LOAD_ALL_PAGES = 20;
 
@@ -37,6 +38,17 @@ function getCountries()
     return ($data && is_array($data)) ? $data : [];
 }
 
+function getProtocols()
+{
+    global $STATS_API;
+    $data = apiRequest($STATS_API);
+    if (!$data || !isset($data['protocols'])) return [];
+
+    // фильтруем только те, у которых есть рабочие сервера
+    $filtered = array_filter($data['protocols'], fn($p) => ($p['working_count'] ?? 0) > 0);
+    return array_values($filtered);
+}
+
 function getPage($page, $country, $protocol)
 {
     global $API_BASE, $PER_PAGE;
@@ -60,9 +72,12 @@ function getPage($page, $country, $protocol)
     ];
 }
 
-// === ЗАГРУЗКА СТРАН ===
+// === ЗАГРУЗКА ДАННЫХ ===
 $countries = getCountries();
 usort($countries, fn($a, $b) => ($b['server_count'] ?? 0) <=> ($a['server_count'] ?? 0));
+
+$protocols = getProtocols();
+usort($protocols, fn($a, $b) => ($b['working_count'] ?? 0) <=> ($a['working_count'] ?? 0));
 
 // === ЛОГИКА ===
 $allConfigs = [];
@@ -260,10 +275,6 @@ if ($action === 'load_more' || $action === 'view') {
                     </select>
                     <select name="protocol" id="protocolSelect" onchange="handleProtocolChange()">
                         <option value="all" <?= $protocol === 'all' ? 'selected' : '' ?>>Все протоколы</option>
-                        <option value="vless" <?= $protocol === 'vless' ? 'selected' : '' ?>>VLESS</option>
-                        <option value="vmess" <?= $protocol === 'vmess' ? 'selected' : '' ?>>VMESS</option>
-                        <option value="trojan" <?= $protocol === 'trojan' ? 'selected' : '' ?>>TROJAN</option>
-                        <option value="shadowsocks" <?= $protocol === 'shadowsocks' ? 'selected' : '' ?>>SHADOWSOCKS</option>
                     </select>
                     <input type="hidden" name="page" value="1">
                     <input type="hidden" name="action" value="view">
@@ -289,15 +300,15 @@ if ($action === 'load_more' || $action === 'view') {
         <div class="loading" id="loading">Загрузка...</div>
     </div>
 
-    <!-- Скрытые данные для JS -->
+    <!-- Данные для JS -->
     <script>
         window.countriesData = <?= json_encode($countries) ?>;
+        window.protocolsData = <?= json_encode($protocols) ?>;
         window.currentCountry = '<?= $country ?>';
         window.currentProtocol = '<?= $protocol ?>';
     </script>
 
     <script>
-        // Функция для флагов (JS-версия, работает идеально)
         function getFlagEmoji(code) {
             if (!code || code.length !== 2) return '';
             return code.toUpperCase().replace(/./g, char =>
@@ -305,43 +316,37 @@ if ($action === 'load_more' || $action === 'view') {
             );
         }
 
-        // Заполнение селектора стран
         function populateCountries() {
             const select = document.getElementById('countrySelect');
-            select.innerHTML = '<option value="all">Все халявные страны</option>'; // Очистка
+            select.innerHTML = '<option value="all">Все халявные страны</option>';
 
-            if (!window.countriesData || !Array.isArray(window.countriesData)) {
-                // Fallback: базовый список, если API недоступен
-                const fallback = [{
-                        code: 'FR',
-                        name: 'France',
-                        server_count: 204
-                    },
-                    {
-                        code: 'MD',
-                        name: 'Moldova',
-                        server_count: 141
-                    },
-                    // Добавь другие, если нужно
-                ];
-                window.countriesData = fallback;
-            }
+            if (!Array.isArray(window.countriesData)) return;
 
-            // Сортировка по server_count (убывание)
             window.countriesData.sort((a, b) => (b.server_count || 0) - (a.server_count || 0));
-
-            window.countriesData.forEach(country => {
-                if (!country.code || !country.name) return;
-                const flag = getFlagEmoji(country.code);
-                const option = document.createElement('option');
-                option.value = country.code;
-                option.textContent = `${flag} ${country.name} (${country.server_count})`;
-                if (country.code === window.currentCountry) option.selected = true;
-                select.appendChild(option);
+            window.countriesData.forEach(c => {
+                const flag = getFlagEmoji(c.code);
+                const opt = document.createElement('option');
+                opt.value = c.code;
+                opt.textContent = `${flag} ${c.name} (${c.server_count})`;
+                if (c.code === window.currentCountry) opt.selected = true;
+                select.appendChild(opt);
             });
 
-            // Обработчик смены страны
             select.onchange = handleCountryChange;
+        }
+
+        function populateProtocols() {
+            const select = document.getElementById('protocolSelect');
+            select.innerHTML = '<option value="all">Все протоколы</option>';
+            if (!Array.isArray(window.protocolsData)) return;
+
+            window.protocolsData.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.textContent = `${p.name.toUpperCase()} (${p.working_count})`;
+                if (p.name === window.currentProtocol) opt.selected = true;
+                select.appendChild(opt);
+            });
         }
 
         function handleCountryChange() {
@@ -354,7 +359,6 @@ if ($action === 'load_more' || $action === 'view') {
             document.getElementById('filterForm').submit();
         }
 
-        // Тема
         const toggleTheme = () => {
             const body = document.body;
             const isDark = body.getAttribute('data-theme') === 'dark';
@@ -364,7 +368,6 @@ if ($action === 'load_more' || $action === 'view') {
             localStorage.setItem('theme', newTheme);
         };
 
-        // Восстановление темы
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.body.setAttribute('data-theme', savedTheme);
         document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
@@ -382,14 +385,14 @@ if ($action === 'load_more' || $action === 'view') {
         const loadMore = () => {
             const loading = document.getElementById('loading');
             loading.style.display = 'block';
-            window.currentCountry = document.getElementById('countrySelect').value;
-            window.currentProtocol = document.getElementById('protocolSelect').value;
             fetch(buildUrl('load_more', <?= $page + 1 ?>))
                 .then(r => r.text())
                 .then(html => {
                     document.body.innerHTML = html;
-                    // Перезаполним страны после замены HTML
-                    setTimeout(populateCountries, 100);
+                    setTimeout(() => {
+                        populateCountries();
+                        populateProtocols();
+                    }, 100);
                 });
         };
 
@@ -397,22 +400,20 @@ if ($action === 'load_more' || $action === 'view') {
             const loading = document.getElementById('loading');
             loading.style.display = 'block';
             loading.textContent = 'Загрузка всех страниц...';
-            window.currentCountry = document.getElementById('countrySelect').value;
-            window.currentProtocol = document.getElementById('protocolSelect').value;
             fetch(buildUrl('load_all', <?= $page ?>))
                 .then(r => r.text())
                 .then(html => {
                     document.body.innerHTML = html;
-                    setTimeout(populateCountries, 100);
+                    setTimeout(() => {
+                        populateCountries();
+                        populateProtocols();
+                    }, 100);
                 });
         };
 
         const copyAll = () => {
             const text = document.getElementById('configs').innerText;
-            if (!text.trim()) {
-                alert('Нет конфигов для копирования');
-                return;
-            }
+            if (!text.trim()) return alert('Нет конфигов для копирования');
             navigator.clipboard.writeText(text).then(() => {
                 const btn = event.target;
                 const orig = btn.textContent;
@@ -422,13 +423,13 @@ if ($action === 'load_more' || $action === 'view') {
                     btn.textContent = orig;
                     btn.style.background = '';
                 }, 2000);
-            }).catch(() => {
-                alert('Ошибка копирования. Выделите текст вручную.');
             });
         };
 
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', populateCountries);
+        document.addEventListener('DOMContentLoaded', () => {
+            populateCountries();
+            populateProtocols();
+        });
     </script>
 </body>
 
