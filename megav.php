@@ -3,8 +3,9 @@ header('Content-Type: text/html; charset=utf-8');
 
 // === НАСТРОЙКИ ===
 $API_BASE = 'https://megav.app/servers-api/configs';
+$COUNTRIES_API = 'https://megav.app/servers-api/countries';
 $PER_PAGE = 20;
-$MAX_LOAD_ALL_PAGES = 20; // Сколько страниц грузить при "все сразу"
+$MAX_LOAD_ALL_PAGES = 20;
 
 // Получаем параметры
 $page = max(1, (int)($_GET['page'] ?? 1));
@@ -12,7 +13,7 @@ $country = $_GET['country'] ?? 'all';
 $protocol = $_GET['protocol'] ?? 'all';
 $action = $_GET['action'] ?? 'view'; // view | load_more | load_all | api
 
-// Функция: запрос к API
+// === ФУНКЦИИ ===
 function apiRequest($url)
 {
     $ch = curl_init();
@@ -25,36 +26,33 @@ function apiRequest($url)
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-
-    if ($httpCode !== 200) {
-        return false;
-    }
-
+    if ($httpCode !== 200) return false;
     return json_decode($response, true);
 }
 
-// Функция: получить данные страницы
+function getCountries()
+{
+    global $COUNTRIES_API;
+    $data = apiRequest($COUNTRIES_API);
+    return ($data && is_array($data)) ? $data : [];
+}
+
 function getPage($page, $country, $protocol)
 {
     global $API_BASE, $PER_PAGE;
-
     $params = http_build_query([
         'page' => $page,
         'per_page' => $PER_PAGE,
         'country' => $country !== 'all' ? $country : '',
         'protocol' => $protocol !== 'all' ? $protocol : ''
     ], '', '&');
-
     $url = "$API_BASE?$params";
     $data = apiRequest($url);
-
     if (!$data || !isset($data['configs'])) {
         return ['configs' => [], 'total_pages' => 1];
     }
-
     $working = array_filter($data['configs'], fn($c) => ($c['v2ray_status'] ?? '') === 'working');
     $urls = array_map(fn($c) => $c['config_url'], $working);
-
     return [
         'configs' => $urls,
         'total_pages' => $data['total_pages'] ?? 1,
@@ -62,7 +60,11 @@ function getPage($page, $country, $protocol)
     ];
 }
 
-// === Обработка действий ===
+// === ЗАГРУЗКА СТРАН ===
+$countries = getCountries();
+usort($countries, fn($a, $b) => ($b['server_count'] ?? 0) <=> ($a['server_count'] ?? 0));
+
+// === ЛОГИКА ===
 $allConfigs = [];
 $error = '';
 $stats = '';
@@ -77,12 +79,11 @@ if ($action === 'load_more' || $action === 'view') {
     $loaded = 0;
     $empty = 0;
     $currentPage = $page;
-
     for ($i = $currentPage; $i < $currentPage + $MAX_LOAD_ALL_PAGES; $i++) {
         $result = getPage($i, $country, $protocol);
         if (empty($result['configs'])) {
             $empty++;
-            if ($empty >= 3) break; // 3 пустые подряд — стоп
+            if ($empty >= 3) break;
         } else {
             $allConfigs = array_merge($allConfigs, $result['configs']);
             $loaded++;
@@ -90,7 +91,6 @@ if ($action === 'load_more' || $action === 'view') {
         }
         usleep(200000); // 200 мс задержка
     }
-
     $totalPages = $result['total_pages'] ?? 1;
     $stats = "Загружено $loaded страниц | Всего конфигов: " . count($allConfigs);
 } elseif ($action === 'api') {
@@ -106,8 +106,6 @@ if ($action === 'load_more' || $action === 'view') {
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
-
-// === HTML-вывод ===
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -240,7 +238,7 @@ if ($action === 'load_more' || $action === 'view') {
             }
 
             select,
-            button {
+            .btn-primary {
                 width: 100%;
             }
 
@@ -254,90 +252,23 @@ if ($action === 'load_more' || $action === 'view') {
 <body data-theme="dark">
     <div class="container">
         <div class="header">
-            <h1>Proxy Parser </h1>
+            <h1>Proxy Parser</h1>
             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                <form method="GET" style="display:flex; gap:0.5rem; flex:1; min-width:200px;">
-                    <select name="country" onchange="this.form.submit()">
-<option value="all" <?= $country==='all'?'selected':'' ?>>Все халявные страны</option>
-<option value="FR" <?= $country==='FR'?'selected':'' ?>>🇫🇷 Seine-Saint-Denis (196)</option>
-<option value="MD" <?= $country==='MD'?'selected':'' ?>>🇲🇩 Chișinău Municipality (138)</option>
-<option value="NL" <?= $country==='NL'?'selected':'' ?>>🇳🇱 North Holland (105)</option>
-<option value="GB" <?= $country==='GB'?'selected':'' ?>>🇬🇧 Manchester (92)</option>
-<option value="US" <?= $country==='US'?'selected':'' ?>>🇺🇸 Washington (86)</option>                        <option value="CY" <?= $country === 'CY' ? 'selected' : '' ?>>🇨🇾 Nicosia (85)</option>
-                        <option value="HK" <?= $country === 'HK' ? 'selected' : '' ?>>🇭🇰 HK (45)</option>
-                        <option value="DE" <?= $country === 'DE' ? 'selected' : '' ?>>🇩🇪 Saxony (30)</option>
-                        <option value="BG" <?= $country === 'BG' ? 'selected' : '' ?>>🇧🇬 Sofia-Capital (26)</option>
-                        <option value="CA" <?= $country === 'CA' ? 'selected' : '' ?>>🇨🇦 Quebec (9)</option>
-                        <option value="SG" <?= $country === 'SG' ? 'selected' : '' ?>>🇸🇬 SG (8)</option>
-                        <option value="TR" <?= $country === 'TR' ? 'selected' : '' ?>>🇹🇷 İzmir Province (8)</option>
-                        <option value="LV" <?= $country === 'LV' ? 'selected' : '' ?>>🇱🇻 Rīga (8)</option>
-                        <option value="JP" <?= $country === 'JP' ? 'selected' : '' ?>>🇯🇵 Tokyo (8)</option>
-                        <option value="IN" <?= $country === 'IN' ? 'selected' : '' ?>>🇮🇳 Telangana (6)</option>
-                        <option value="RU" <?= $country === 'RU' ? 'selected' : '' ?>>🇷🇺 Moscow (6)</option>
-                        <option value="MY" <?= $country === 'MY' ? 'selected' : '' ?>>🇲🇾 Kuala Lumpur (5)</option>
-                        <option value="TW" <?= $country === 'TW' ? 'selected' : '' ?>>🇹🇼 Taipei City (5)</option>
-                        <option value="FI" <?= $country === 'FI' ? 'selected' : '' ?>>🇫🇮 Uusimaa (5)</option>
-                        <option value="VN" <?= $country === 'VN' ? 'selected' : '' ?>>🇻🇳 Hanoi (4)</option>
-                        <option value="BR" <?= $country === 'BR' ? 'selected' : '' ?>>🇧🇷 São Paulo (3)</option>
-                        <option value="IT" <?= $country === 'IT' ? 'selected' : '' ?>>🇮🇹 Province of Milan (3)</option>
-                        <option value="MA" <?= $country === 'MA' ? 'selected' : '' ?>>🇲🇦 Fes (3)</option>
-                        <option value="EC" <?= $country === 'EC' ? 'selected' : '' ?>>🇪🇨 Pichincha (3)</option>
-                        <option value="AE" <?= $country === 'AE' ? 'selected' : '' ?>>🇦🇪 Umm al Qaywayn (3)</option>
-                        <option value="PL" <?= $country === 'PL' ? 'selected' : '' ?>>🇵🇱 Mazovia (3)</option>
-                        <option value="TH" <?= $country === 'TH' ? 'selected' : '' ?>>🇹🇭 Bangkok (3)</option>
-                        <option value="PR" <?= $country === 'PR' ? 'selected' : '' ?>>🇵🇷 PR (2)</option>
-                        <option value="AR" <?= $country === 'AR' ? 'selected' : '' ?>>🇦🇷 Buenos Aires F.D. (2)</option>
-                        <option value="BH" <?= $country === 'BH' ? 'selected' : '' ?>>🇧🇭 Manama (2)</option>
-                        <option value="CR" <?= $country === 'CR' ? 'selected' : '' ?>>🇨🇷 Provincia de San José (2)</option>
-                        <option value="DK" <?= $country === 'DK' ? 'selected' : '' ?>>🇩🇰 Capital Region (2)</option>
-                        <option value="DZ" <?= $country === 'DZ' ? 'selected' : '' ?>>🇩🇿 Boumerdes (2)</option>
-                        <option value="EG" <?= $country === 'EG' ? 'selected' : '' ?>>🇪🇬 Cairo Governorate (2)</option>
-                        <option value="ES" <?= $country === 'ES' ? 'selected' : '' ?>>🇪🇸 Madrid (2)</option>
-                        <option value="ID" <?= $country === 'ID' ? 'selected' : '' ?>>🇮🇩 Jakarta (2)</option>
-                        <option value="KH" <?= $country === 'KH' ? 'selected' : '' ?>>🇰🇭 Phnom Penh (2)</option>
-                        <option value="KR" <?= $country === 'KR' ? 'selected' : '' ?>>🇰🇷 Seoul (2)</option>
-                        <option value="KZ" <?= $country === 'KZ' ? 'selected' : '' ?>>🇰🇿 Almaty (2)</option>
-                        <option value="LT" <?= $country === 'LT' ? 'selected' : '' ?>>🇱🇹 Vilnius City Municipality (2)</option>
-                        <option value="MK" <?= $country === 'MK' ? 'selected' : '' ?>>🇲🇰 MK (2)</option>
-                        <option value="MT" <?= $country === 'MT' ? 'selected' : '' ?>>🇲🇹 Valletta (2)</option>
-                        <option value="MX" <?= $country === 'MX' ? 'selected' : '' ?>>🇲🇽 Mexico City (2)</option>
-                        <option value="NG" <?= $country === 'NG' ? 'selected' : '' ?>>🇳🇬 Lagos (2)</option>
-                        <option value="PA" <?= $country === 'PA' ? 'selected' : '' ?>>🇵🇦 Provincia de Panamá (2)</option>
-                        <option value="PE" <?= $country === 'PE' ? 'selected' : '' ?>>🇵🇪 Lima region (2)</option>
-                        <option value="PT" <?= $country === 'PT' ? 'selected' : '' ?>>🇵🇹 Lisbon (2)</option>
-                        <option value="SE" <?= $country === 'SE' ? 'selected' : '' ?>>🇸🇪 Stockholm County (2)</option>
-                        <option value="SI" <?= $country === 'SI' ? 'selected' : '' ?>>🇸🇮 Ljubljana (2)</option>
-                        <option value="ZA" <?= $country === 'ZA' ? 'selected' : '' ?>>🇿🇦 Gauteng (2)</option>
-                        <option value="UA" <?= $country === 'UA' ? 'selected' : '' ?>>🇺🇦 Kyiv City (1)</option>
-                        <option value="GT" <?= $country === 'GT' ? 'selected' : '' ?>>🇬🇹 Guatemala (1)</option>
-                        <option value="GR" <?= $country === 'GR' ? 'selected' : '' ?>>🇬🇷 Central Macedonia (1)</option>
-                        <option value="AT" <?= $country === 'AT' ? 'selected' : '' ?>>🇦🇹 Vienna (1)</option>
-                        <option value="PY" <?= $country === 'PY' ? 'selected' : '' ?>>🇵🇾 Asunción (1)</option>
-                        <option value="RO" <?= $country === 'RO' ? 'selected' : '' ?>>🇷🇴 București (1)</option>
-                        <option value="EE" <?= $country === 'EE' ? 'selected' : '' ?>>🇪🇪 Tallinn (1)</option>
-                        <option value="AM" <?= $country === 'AM' ? 'selected' : '' ?>>🇦🇲 AM (1)</option>
-                        <option value="CZ" <?= $country === 'CZ' ? 'selected' : '' ?>>🇨🇿 Prague (1)</option>
-                        <option value="LU" <?= $country === 'LU' ? 'selected' : '' ?>>🇱🇺 Luxembourg (1)</option>
-                        <option value="ME" <?= $country === 'ME' ? 'selected' : '' ?>>🇲🇪 ME (1)</option>
-                        <option value="XK" <?= $country === 'XK' ? 'selected' : '' ?>>🇽🇰 XK (1)</option>
-                        <option value="SK" <?= $country === 'SK' ? 'selected' : '' ?>>🇸🇰 Bratislava Region (1)</option>
-                        <option value="CL" <?= $country === 'CL' ? 'selected' : '' ?>>🇨🇱 Santiago Metropolitan (1)</option>
-                        <option value="IL" <?= $country === 'IL' ? 'selected' : '' ?>>🇮🇱 Central District (1)</option>
-                        <option value="BO" <?= $country === 'BO' ? 'selected' : '' ?>>🇧🇴 La Paz Department (1)</option>
-                        <option value="HU" <?= $country === 'HU' ? 'selected' : '' ?>>🇭🇺 Budapest (1)</option>
-                        <option value="NO" <?= $country === 'NO' ? 'selected' : '' ?>>🇳🇴 Oslo County (1)</option>
-                        <option value="AU" <?= $country === 'AU' ? 'selected' : '' ?>>🇦🇺 New South Wales (1)</option>
+                <form method="GET" style="display:flex; gap:0.5rem; flex:1; min-width:200px;" id="filterForm">
+                    <select name="country" id="countrySelect">
+                        <option value="all">Все халявные страны</option>
                     </select>
-                    <select name="protocol" onchange="this.form.submit()">
-                        <option value="all">Все протоколы</option>
+                    <select name="protocol" id="protocolSelect" onchange="handleProtocolChange()">
+                        <option value="all" <?= $protocol === 'all' ? 'selected' : '' ?>>Все протоколы</option>
                         <option value="vless" <?= $protocol === 'vless' ? 'selected' : '' ?>>VLESS</option>
                         <option value="vmess" <?= $protocol === 'vmess' ? 'selected' : '' ?>>VMESS</option>
                         <option value="trojan" <?= $protocol === 'trojan' ? 'selected' : '' ?>>TROJAN</option>
                         <option value="shadowsocks" <?= $protocol === 'shadowsocks' ? 'selected' : '' ?>>SHADOWSOCKS</option>
                     </select>
                     <input type="hidden" name="page" value="1">
+                    <input type="hidden" name="action" value="view">
                 </form>
-                <button onclick="toggleTheme()">Переключить тему</button>
+                <button id="themeToggle" onclick="toggleTheme()">🌙</button>
             </div>
         </div>
 
@@ -345,8 +276,7 @@ if ($action === 'load_more' || $action === 'view') {
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
-        <div class="stats"><?= $stats ?></div>
-
+        <div class="stats"><?= htmlspecialchars($stats) ?></div>
         <div class="configs" id="configs">
             <?= htmlspecialchars(implode("\n\n", $allConfigs)) ?>
         </div>
@@ -356,25 +286,93 @@ if ($action === 'load_more' || $action === 'view') {
             <button class="btn-primary" onclick="loadMore()">Следующая страница</button>
             <button class="btn-primary" onclick="loadAll()">Все конфиги (<?= $MAX_LOAD_ALL_PAGES ?> стр)</button>
         </div>
-
         <div class="loading" id="loading">Загрузка...</div>
     </div>
 
+    <!-- Скрытые данные для JS -->
     <script>
+        window.countriesData = <?= json_encode($countries) ?>;
+        window.currentCountry = '<?= $country ?>';
+        window.currentProtocol = '<?= $protocol ?>';
+    </script>
+
+    <script>
+        // Функция для флагов (JS-версия, работает идеально)
+        function getFlagEmoji(code) {
+            if (!code || code.length !== 2) return '';
+            return code.toUpperCase().replace(/./g, char =>
+                String.fromCodePoint(0x1F1E6 + char.charCodeAt(0) - 0x41)
+            );
+        }
+
+        // Заполнение селектора стран
+        function populateCountries() {
+            const select = document.getElementById('countrySelect');
+            select.innerHTML = '<option value="all">Все халявные страны</option>'; // Очистка
+
+            if (!window.countriesData || !Array.isArray(window.countriesData)) {
+                // Fallback: базовый список, если API недоступен
+                const fallback = [{
+                        code: 'FR',
+                        name: 'France',
+                        server_count: 204
+                    },
+                    {
+                        code: 'MD',
+                        name: 'Moldova',
+                        server_count: 141
+                    },
+                    // Добавь другие, если нужно
+                ];
+                window.countriesData = fallback;
+            }
+
+            // Сортировка по server_count (убывание)
+            window.countriesData.sort((a, b) => (b.server_count || 0) - (a.server_count || 0));
+
+            window.countriesData.forEach(country => {
+                if (!country.code || !country.name) return;
+                const flag = getFlagEmoji(country.code);
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = `${flag} ${country.name} (${country.server_count})`;
+                if (country.code === window.currentCountry) option.selected = true;
+                select.appendChild(option);
+            });
+
+            // Обработчик смены страны
+            select.onchange = handleCountryChange;
+        }
+
+        function handleCountryChange() {
+            document.querySelector('input[name="action"]').value = 'view';
+            document.getElementById('filterForm').submit();
+        }
+
+        function handleProtocolChange() {
+            document.querySelector('input[name="action"]').value = 'view';
+            document.getElementById('filterForm').submit();
+        }
+
+        // Тема
         const toggleTheme = () => {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.getElementById('themeToggle').textContent = newTheme === 'dark' ? '🌙' : '☀️';
+            localStorage.setItem('theme', newTheme);
         };
 
-        // Загрузка темы
-        const saved = localStorage.getItem('theme') || 'dark';
-        document.body.setAttribute('data-theme', saved);
+        // Восстановление темы
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
 
         const buildUrl = (action, page) => {
             const params = new URLSearchParams({
-                country: '<?= $country ?>',
-                protocol: '<?= $protocol ?>',
+                country: window.currentCountry,
+                protocol: window.currentProtocol,
                 action: action
             });
             if (page) params.set('page', page);
@@ -384,10 +382,14 @@ if ($action === 'load_more' || $action === 'view') {
         const loadMore = () => {
             const loading = document.getElementById('loading');
             loading.style.display = 'block';
+            window.currentCountry = document.getElementById('countrySelect').value;
+            window.currentProtocol = document.getElementById('protocolSelect').value;
             fetch(buildUrl('load_more', <?= $page + 1 ?>))
                 .then(r => r.text())
                 .then(html => {
                     document.body.innerHTML = html;
+                    // Перезаполним страны после замены HTML
+                    setTimeout(populateCountries, 100);
                 });
         };
 
@@ -395,15 +397,22 @@ if ($action === 'load_more' || $action === 'view') {
             const loading = document.getElementById('loading');
             loading.style.display = 'block';
             loading.textContent = 'Загрузка всех страниц...';
+            window.currentCountry = document.getElementById('countrySelect').value;
+            window.currentProtocol = document.getElementById('protocolSelect').value;
             fetch(buildUrl('load_all', <?= $page ?>))
                 .then(r => r.text())
                 .then(html => {
                     document.body.innerHTML = html;
+                    setTimeout(populateCountries, 100);
                 });
         };
 
         const copyAll = () => {
             const text = document.getElementById('configs').innerText;
+            if (!text.trim()) {
+                alert('Нет конфигов для копирования');
+                return;
+            }
             navigator.clipboard.writeText(text).then(() => {
                 const btn = event.target;
                 const orig = btn.textContent;
@@ -413,8 +422,13 @@ if ($action === 'load_more' || $action === 'view') {
                     btn.textContent = orig;
                     btn.style.background = '';
                 }, 2000);
+            }).catch(() => {
+                alert('Ошибка копирования. Выделите текст вручную.');
             });
         };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', populateCountries);
     </script>
 </body>
 
